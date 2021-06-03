@@ -28,7 +28,7 @@ int main()
     int check = 0;
     int height = 0;
     int width = 0;
-    printf("Podaj szerokość i wysokość: ");
+    printf("Podaj szerokosc i wysokosc: ");
     check = scanf("%d %d", &width, &height);
     if (check != 2) {
         printf("incorrect input");
