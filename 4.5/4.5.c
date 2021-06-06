@@ -24,7 +24,7 @@ int main()
     }
     */
     //koniec testu
-    struct matrix_t matrix;
+    struct matrix_t* matrix;
     int check = 0;
     int height = 0;
     int width = 0;
@@ -37,44 +37,129 @@ int main()
 
     //matrix.width = -3;
     //matrix.height = 7;
-
-    check = matrix_create(&matrix, width, height);
-    if (check == 1) {
+    if (width <= 0 || height <= 0) {
         printf("incorrect input data");
         return 2;
     }
-    else if (check == 2) {
+    matrix = matrix_create_struct(width, height);
+    if (matrix == NULL) {
         printf("Failed to allocate memory");
         return 8;
     }
-
-
-    check = matrix_read(&matrix);
+    
+    check = matrix_read(matrix);
     if (check == 1) {
         printf("incorrect input data");
-        matrix_destroy(&matrix);
+        matrix_destroy_struct(&matrix);
         return 8;
     }
     else if (check == 2) {
         printf("incorrect input");
-        matrix_destroy(&matrix);
+        matrix_destroy_struct(&matrix);
         return 1;
     }
-
-    matrix_display(&matrix);
-    printf("\n");
-    matrix_display(matrix_transpose(&matrix));
-
-    char filename;
-    printf("Podaj nazwę pliku");
-    int checkChar = scanf("%c", &filename);
+   
+    char* filename;
+    filename = (char*)calloc(40, sizeof(char));
+    
+    if (filename == NULL) {
+        printf("Failed to allocate memory");
+        matrix_destroy_struct(&matrix);
+        
+        return 8;
+    }
+    matrix_display(matrix);
+    printf("Podaj nazwe pliku: ");
+    int checkChar = scanf("%39s", filename);
+    
     if (checkChar != 1) {
         printf("incorrect input");
+        
+        matrix_destroy_struct(&matrix);
+       
+        free(filename);
         return 1;
     }
-    matrix_save_b(&matrix, &filename);
-    matrix_save_t(&matrix, &filename);
-
-    matrix_destroy(&matrix);
+    if (strlen(filename) < 4) {
+        printf("Unsupported file format");
+        free(filename);
+        
+        matrix_destroy_struct(&matrix);
+        
+        return 7;
+    }
+    char* ext;
+    ext = (char*)calloc(5, sizeof(char));
+    if (ext == NULL) {
+        printf("Failed to allocate memory");
+        matrix_destroy_struct(&matrix);
+        free(filename);
+        return 8;
+    }
+    struct matrix_t* transpose = matrix_transpose(matrix);
+    if (transpose == NULL) {
+        printf("Failed to allocate memory");
+        matrix_destroy_struct(&matrix);
+        
+       
+        free(ext);
+        free(filename);
+        return 8;
+    }
+    
+    strcpy(ext, filename + (strlen(filename) - 4));
+    if(strcmp(ext, ".bin") == 0){
+        check = matrix_save_b(transpose, filename);
+        if (check == 2) {
+            printf("Couldn't create file");
+            free(filename);
+            free(ext);
+            matrix_destroy_struct(&matrix);
+            matrix_destroy_struct(&transpose);
+            return 5;
+        }
+        else if (check == 1) {
+            printf("Incorrect input data");
+            free(filename);
+            free(ext);
+            matrix_destroy_struct(&matrix);
+            matrix_destroy_struct(&transpose);
+            return 8;
+        }
+    }
+    else if (strcmp(ext, ".txt") == 0) {
+        check = matrix_save_t(transpose, filename);
+        if (check == 2) {
+            printf("Couldn't create file");
+            free(filename);
+            free(ext);
+            matrix_destroy_struct(&matrix);
+            matrix_destroy_struct(&transpose);
+            return 5;
+        }
+        else if (check == 1) {
+            printf("Incorrect input data");
+            free(filename);
+            free(ext);
+            matrix_destroy_struct(&matrix);
+            matrix_destroy_struct(&transpose);
+            return 8;
+        }
+    }
+    else {
+        printf("Unsupported file format");
+        free(filename);
+        free(ext);
+        matrix_destroy_struct(&matrix);
+        matrix_destroy_struct(&transpose);
+        return 7;
+    }
+       
+    
+    printf("File saved");
+    matrix_destroy_struct(&transpose);
+    matrix_destroy_struct(&matrix);
+    free(ext);
+    free(filename);
     return 0;
 }

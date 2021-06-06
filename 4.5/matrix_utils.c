@@ -136,14 +136,12 @@ int matrix_save_b(const struct matrix_t* m, const char* filename) {
 
     fwrite(&m->width, sizeof(unsigned int), 1, f);
     fwrite(&m->height, sizeof(unsigned int), 1, f);
-
-    //printf("Saving rectangles to file = %s\n", filename);
-    //for (i = 0; i < m->height; i++) {
-        //const struct rectangle_t* rectangle_ptr = *(rectangles + i);
-        //printf("%d %d %d %d\n", rectangle_ptr->x, rectangle_ptr->y, rectangle_ptr->width, rectangle_ptr->height);
-    fwrite(m->ptr, sizeof(int), m->height * m->width, f);//pokoleji wype³nia czêœci struktury
-//}
-
+    
+    for (int i = 0; i < m->height; i++) {
+       
+        fwrite(*(m->ptr + i), sizeof(int), m->width, f);
+    }
+ 
     fclose(f);
     return 0;
 }
@@ -157,16 +155,15 @@ int matrix_save_t(const struct matrix_t* m, const char* filename) {
     if (f == NULL) {
         return 2;
     }
-
-    fwrite(&m->width, sizeof(unsigned int), 1, f);
-    fwrite(&m->height, sizeof(unsigned int), 1, f);
-
+    fprintf(f, "%d %d\n", m->width, m->height);
     //printf("Saving rectangles to file = %s\n", filename);
-    //for (i = 0; i < m->height; i++) {
-        //const struct rectangle_t* rectangle_ptr = *(rectangles + i);
-        //printf("%d %d %d %d\n", rectangle_ptr->x, rectangle_ptr->y, rectangle_ptr->width, rectangle_ptr->height);
-    fwrite(m->ptr, sizeof(int), m->height * m->width, f);//pokoleji wype³nia czêœci struktury
-//}
+    for (int i = 0; i < m->height; i++) {
+        for (int j = 0; j < m->width; j++) {
+            int temp = *(*(m->ptr + i) + j);
+            fprintf(f, "%d ", temp);
+       }
+        fprintf(f, "\n");
+    }
 
     fclose(f);
     return 0;
